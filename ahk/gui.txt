@@ -1,0 +1,46 @@
+1.)	Felépített GUI megjelenítése és elindítása
+	Fejléce: Szöveg
+	Szélessége: 300 pixel
+	Magassága: 200 pixel
+	Gui, Show, w300 h200, Szöveg
+	return
+	
+2.)	X-szel bezárt ablak esetén bezárni az alkalmazást
+	GuiClose:
+	ExitApp
+	
+3.)	Egy mező létrehozása
+	Mező magassága: 1 karakter
+	Mező szélessége 100 pixel
+	Mező x irányú poziciója: 110
+	Mező y irányú poziciója: 10
+	Feltőltése 123 értékkel
+	Azonosító: FieldVariable
+	Gui, Add, Edit, x110 y10 w100 r1 vFieldVariable, 123
+	
+4)	Egy nyomógomb létrehozása
+	Gomb szélessége: 100 pixel
+	Gomb x irányú poziciója: 5
+	Gomb y irányú poziciója: 35
+	Gomb Felirata és egyben azonosítója: Gomb
+	Gui, Add, Button, x5 y35 w100 Default, Gomb
+	
+5.)	Nyomógomb Benyomásakor a mező tiltása
+	ButtonGomb:
+	GuiControl, Disable, FieldVariable
+	return
+	
+6.)	Nyomogomb benyomásakor a mező feltöltése
+	ButtonGomb:
+	GuiControl, , FieldVariabla, 222
+	return
+
+7.)	Nyomogomb benyomasakor a mező tartalma a vágólapra
+	ButtonGomb:
+	GuiControlGet, output, , FieldWariable
+	clipboard = %output%
+	return
+	
+8.)	Ha megváltozik a mező tartalma, akkor figyelmeztető ablak jelenjen meg
+	FieldVariable:
+	msgBox változás történt

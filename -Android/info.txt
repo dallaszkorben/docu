@@ -1,0 +1,5 @@
+Make your phone Developer
+    Go Setting > General > About phone > Software Information
+    Tap 7x on Build Number
+
+    

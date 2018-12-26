@@ -1,0 +1,8 @@
+TN_private_VE4FP7	FE:F5:28:1B:E3:AC	WPA2
+TN_private_NWYH4C	4C:9E:FF:B8:C1:F0	WPA
+TN_private_9VKX3X	FE:F5:28:82:82:E4	WPA2
+
+
+5E:F4:AB:3C:84:64	TN_private_47FVRY	WPAcrack-01.cap
+80:37:73:F1:73:F7	ComDomojf3		output-01.cap
+FE:F5:28:82:82:E4	TN_private_9VKX3X	wpacrack-01.cap

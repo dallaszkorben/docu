@@ -1,0 +1,42 @@
+1. download iso file from https://www.ubuntu.com/download/desktop
+2. create bootable usb using the is with Startup Disk Creator
+3. install the ubuntu puting the stick into the computer and restart it
+4. check if the architecture is 64bit: 
+				lscpu
+5. Select Kubuntu instead of Gnome Desktop Environment
+				sudo apt-get install kubuntu-desktop
+				sudo apt-get purge ubuntu-gnome-desktop
+				sudo apt-get autoremove --purge
+6. Under the installation kubuntu-desktop select the right Display Manager
+				sddm
+				you can edit it int /etc/X11/default-display-manager
+7. Something is wrong so you have to run the following commands:
+				cd /tmp
+				apt-get download kde-config-telepathy-accounts
+				sudo dpkg -i --force-overwrite kde-config-telepathy-accounts_*.deb
+				sudo apt-get install -f
+8. Something is still wrong. sddm does not start. The screen freezes
+				sudo dpkg-reconfigure sddm
+				<select lightdm + save>
+				sudo systemctl disable lightdm
+				sudo apt-get purge --auto-remove lightdm
+9. install apps:
+sudo apt-get install mc
+sudo apt-get install encfs
+sudo apt-get install sshfs
+sudo apt-get install git
+sudo apt-get install mplayer
+java
+python
+multibit-classic
+chrome		https://www.google.com/chrome
+
+sshfs pi@192.168.0.111:/media/pi ~/mnt
+
+
+10. Updete to 17.10		Can not login, the keyboard does not work anymore
+				login with ssh from other computer / shift while booting + into grup shell + boot into admin mode
+				sudo apt-get install xserver-xorg-input-all
+				sudo apt-get --purge autoremove xserver-xorg-input-all && sudo apt-get install xserver-xorg-input-all (I skiped this step)
+
+				another idea: sudo apt remove fwupd (it did not work for me)
